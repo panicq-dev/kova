@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using NexusChat.DTOs;
+using NexusChat.DTOs.Request;
 using NexusChat.Services;
 
 namespace NexusChat.Controllers;
@@ -24,6 +25,11 @@ public class UsuarioController : ControllerBase
             return BadRequest(resultado.Errors);
         }
         return Ok(resultado);
+        
+    }
+
+    public async Task<IActionResult> Login(UsuarioSignRequest usuarioRequest)
+    {
         
     }
 }

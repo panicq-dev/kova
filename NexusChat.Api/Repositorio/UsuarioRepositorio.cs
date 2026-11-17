@@ -1,55 +1,39 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using NexusChat.Data;
-using NexusChat.DTOs;
-using NexusChat.DTOs.Response;
-using NexusChat.Model;
-using NexusChat.Services;
+using NexusChat.Api.Models;
 
 namespace NexusChat.Repositorio;
 
 public class UsuarioRepositorio : IUsuarioRepositorio
 {
-    private readonly AutenticacaoService _authService;
-    private readonly SignInManager<Usuario> _signInManager;
     private readonly UserManager<Usuario> _userManager;
-    
 
-    public UsuarioRepositorio(AppDbContext db, SignInManager<Usuario> signInManager, UserManager<Usuario> userManager, AutenticacaoService authService)
+    public UsuarioRepositorio(UserManager<Usuario> userManager)
     {
-        _signInManager = signInManager;
         _userManager = userManager;
-        _authService = authService;
     }
 
-    public async Task<IdentityResult> Registrar(Usuario usuario)
+    public Task<IdentityResult> Registrar(Usuario usuario, string senha)
     {
-        var resultado = await _userManager.CreateAsync(usuario, usuario.Senha);
-        return resultado;
-    }
-    
-    public async Task<Usuario?> ObterPorId(string id)
-    {
-        var usuario = await _userManager.FindByIdAsync(id);
-        return usuario;
+        return _userManager.CreateAsync(usuario, senha);
     }
 
-    public async Task<(SignInResult Resultado, JwtResponse? Tokens)> Entrar(UsuarioSignRequest dto)
+    public Task<Usuario?> ObterPorId(string id)
     {
-        var resultadoLogin = await _signInManager.PasswordSignInAsync(
-            dto.NomeDeUsuario, 
-            dto.Senha, 
-            isPersistent: true, 
-            lockoutOnFailure: false);
+        return _userManager.FindByIdAsync(id);
+    }
 
-        if (!resultadoLogin.Succeeded)
-        {
-            return (resultadoLogin, null);
-        }
+    public Task<Usuario?> ObterPorNomeDeUsuario(string nomeDeUsuario)
+    {
+        return _userManager.FindByNameAsync(nomeDeUsuario);
+    }
 
-        var usuario = await _userManager.FindByNameAsync(dto.NomeDeUsuario);
-        var parTokens = _authService.GerarToken(usuario!);
+    public Task<bool> VerificarSenha(Usuario usuario, string senha)
+    {
+        return _userManager.CheckPasswordAsync(usuario, senha);
+    }
 
-        return (resultadoLogin, parTokens);
+    public Task<IdentityResult> Atualizar(Usuario usuario)
+    {
+        return _userManager.UpdateAsync(usuario);
     }
 }

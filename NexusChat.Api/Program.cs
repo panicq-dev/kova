@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NexusChat.Api.Models;
 using NexusChat.Data;
-using NexusChat.Model;
 using NexusChat.Repositorio;
 using NexusChat.Services;
 
