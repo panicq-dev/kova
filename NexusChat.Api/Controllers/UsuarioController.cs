@@ -27,7 +27,7 @@ public class UsuarioController : ControllerBase
         return Ok(resultado);
         
     }
-
+    [HttpPost("login")]
     public async Task<IActionResult> Login(UsuarioSignRequest usuarioRequest)
     {
         var resposta = await _usuarioService.Entrar(usuarioRequest);
@@ -38,6 +38,7 @@ public class UsuarioController : ControllerBase
         return Ok(resposta);
     }
 
+    [HttpPost("refresh-token")]
     public async Task<IActionResult> RecriarRefreshToken(RefreshTokenRequest refreshTokenRequest)
     {
         var resposta = await _usuarioService.RecriarRefreshToken(refreshTokenRequest);
