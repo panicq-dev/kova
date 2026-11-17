@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusChat", "NexusChat\NexusChat.csproj", "{29F58C12-CDE3-485C-A989-02441DF02FC1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NexusChat.Api", "NexusChat.Api\NexusChat.Api.csproj", "{29F58C12-CDE3-485C-A989-02441DF02FC1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
