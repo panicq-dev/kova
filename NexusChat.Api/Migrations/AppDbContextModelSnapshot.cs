@@ -199,7 +199,7 @@ namespace NexusChat.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                    b.Property<DateTime?>("RefreshTokenTempoExpiracao")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SecurityStamp")

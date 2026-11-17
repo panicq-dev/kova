@@ -48,10 +48,39 @@ public class UsuarioService
         var refreshMinutos = _configuration.GetValue<int>("JWTConfig:RefreshTempoExpiracaoEmMinutos", 120);
 
         usuario.RefreshToken = parTokens.RefreshToken;
-        usuario.RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(refreshMinutos);
+        usuario.RefreshTokenTempoExpiracao = DateTime.UtcNow.AddMinutes(refreshMinutos);
 
         await _usuarioRepositorio.Atualizar(usuario);
 
+        return parTokens;   
+    }
+
+    public async Task<JwtResponse?> RecriarRefreshToken(RefreshTokenRequest refreshRequest)
+    {
+        
+        var usuario = await _usuarioRepositorio.ObterPorNomeDeUsuario(refreshRequest.NomeDeUsuario);
+        if (usuario is null)
+            return null;
+        
+        var agora = DateTime.UtcNow;
+        var usuarioRefreshTokenTempoExpiracao =  usuario.RefreshTokenTempoExpiracao;
+        
+        if (string.IsNullOrEmpty(usuario.RefreshToken) ||
+            usuario.RefreshToken != refreshRequest.RefreshToken ||
+            usuario.RefreshTokenTempoExpiracao is null ||
+            usuario.RefreshTokenTempoExpiracao <= DateTime.UtcNow)
+        {
+            return null; 
+        }
+        var parTokens = _autenticacaoService.GerarToken(usuario);
+        var refreshMinutos = _configuration.GetValue<int>("JWTConfig:RefreshTempoExpiracaoEmMinutos", 120);
+
+        usuario.RefreshToken = parTokens.RefreshToken; // Atribuindo o novo RefreshToken.
+        usuario.RefreshTokenTempoExpiracao = DateTime.UtcNow.AddMinutes(refreshMinutos); // Atribuindo novo horário de expiração do RefreshToken
+        
+        await _usuarioRepositorio.Atualizar(usuario);
+        
         return parTokens;
+
     }
 }

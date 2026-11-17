@@ -30,6 +30,21 @@ public class UsuarioController : ControllerBase
 
     public async Task<IActionResult> Login(UsuarioSignRequest usuarioRequest)
     {
-        
+        var resposta = await _usuarioService.Entrar(usuarioRequest);
+        if (resposta is null)
+        {
+            return Unauthorized("O usuário ou senha são invalidos.");
+        };
+        return Ok(resposta);
+    }
+
+    public async Task<IActionResult> RecriarRefreshToken(RefreshTokenRequest refreshTokenRequest)
+    {
+        var resposta = await _usuarioService.RecriarRefreshToken(refreshTokenRequest);
+        if (resposta is null)
+        {
+            return Unauthorized("Sem autorização. RefreshToken expirado ou nulo.");
+        };
+        return Ok(resposta);
     }
 }
