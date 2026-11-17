@@ -11,33 +11,88 @@ export interface JwtResponse {
     refreshToken: string;
 }
 
+function extrairMensagemErro(erroData: unknown, status: number): string {
+    if (Array.isArray(erroData) && erroData.length > 0) {
+        return erroData
+            .map((e: { description?: string }) => e.description || JSON.stringify(e))
+            .join(" ");
+    }
+
+    if (erroData && typeof erroData === "object") {
+        const obj = erroData as {
+            errors?: Record<string, string[]>;
+            mensagem?: string;
+            message?: string;
+            title?: string;
+        };
+
+        if (obj.errors) {
+            return Object.values(obj.errors).flat().join(" ");
+        }
+
+        if (obj.mensagem) return obj.mensagem;
+        if (obj.message) return obj.message;
+        if (obj.title) return `${obj.title} (HTTP ${status})`;
+    }
+
+    return `Erro HTTP ${status} ao processar a requisição.`;
+}
+
 export async function registrarUsuario(dados: UsuarioSignRequest): Promise<void> {
-    const response = await fetch(`${API_URL}/api/usuario/registrar`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados),
-    });
+    if (!API_URL) {
+        throw new Error("NEXT_PUBLIC_API_URL não está definida no .env.local.");
+    }
+
+    let response: Response;
+
+    try {
+        response = await fetch(`${API_URL}/api/usuario/registrar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dados),
+        });
+    } catch {
+        throw new Error(
+            `Falha de conexão com ${API_URL}. Verifique se a API C# está rodando e se o certificado HTTPS foi aceito.`
+        );
+    }
 
     if (!response.ok) {
         const erroData = await response.json().catch(() => null);
-        if (Array.isArray(erroData) && erroData.length > 0) {
-            throw new Error(erroData.map((e: { description: string }) => e.description).join(" "));
-        }
-        throw new Error("Não foi possível realizar o cadastro.");
+        throw new Error(extrairMensagemErro(erroData, response.status));
     }
 }
 
 export async function loginUsuario(
     dados: Omit<UsuarioSignRequest, "email">
 ): Promise<JwtResponse> {
-    const response = await fetch(`${API_URL}/api/usuario/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dados),
-    });
+    if (!API_URL) {
+        throw new Error("NEXT_PUBLIC_API_URL não está definida no .env.local.");
+    }
+
+    let response: Response;
+
+    try {
+        response = await fetch(`${API_URL}/api/usuario/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ...dados,
+                email: "login@nexuschat.local",
+            }),
+        });
+    } catch {
+        throw new Error(
+            `Falha de conexão com ${API_URL}. Verifique se a API C# está rodando.`
+        );
+    }
 
     if (!response.ok) {
-        throw new Error("Usuário ou senha inválidos.");
+        const erroData = await response.json().catch(() => null);
+        if (response.status === 401) {
+            throw new Error("Usuário ou senha inválidos.");
+        }
+        throw new Error(extrairMensagemErro(erroData, response.status));
     }
 
     const tokens: JwtResponse = await response.json();
@@ -50,27 +105,33 @@ export async function loginUsuario(
 }
 
 export async function renovarSessao(): Promise<JwtResponse | null> {
+    if (!API_URL) return null;
+
     const nomeDeUsuario = localStorage.getItem("nexus_username");
     const refreshToken = localStorage.getItem("nexus_refresh_token");
 
     if (!nomeDeUsuario || !refreshToken) return null;
 
-    const response = await fetch(`${API_URL}/api/usuario/refresh-token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nomeDeUsuario, refreshToken }),
-    });
+    try {
+        const response = await fetch(`${API_URL}/api/usuario/refresh-token`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nomeDeUsuario, refreshToken }),
+        });
 
-    if (!response.ok) {
-        logoutUsuario();
+        if (!response.ok) {
+            logoutUsuario();
+            return null;
+        }
+
+        const novosTokens: JwtResponse = await response.json();
+        localStorage.setItem("nexus_token", novosTokens.token);
+        localStorage.setItem("nexus_refresh_token", novosTokens.refreshToken);
+
+        return novosTokens;
+    } catch {
         return null;
     }
-
-    const novosTokens: JwtResponse = await response.json();
-    localStorage.setItem("nexus_token", novosTokens.token);
-    localStorage.setItem("nexus_refresh_token", novosTokens.refreshToken);
-
-    return novosTokens;
 }
 
 export function logoutUsuario(): void {
@@ -79,12 +140,15 @@ export function logoutUsuario(): void {
     localStorage.removeItem("nexus_username");
 }
 
-// Use esta função para qualquer rota protegida com [Authorize] na sua API
 export async function fetchAutenticado(
     endpoint: string,
     options: RequestInit = {}
 ): Promise<Response> {
-    let token = localStorage.getItem("nexus_token");
+    if (!API_URL) {
+        throw new Error("NEXT_PUBLIC_API_URL não está definida no .env.local.");
+    }
+
+    const token = localStorage.getItem("nexus_token");
 
     const fazerRequisicao = (accessToken: string | null) =>
         fetch(`${API_URL}${endpoint}`, {
@@ -97,6 +161,7 @@ export async function fetchAutenticado(
         });
 
     let response = await fazerRequisicao(token);
+
     if (response.status === 401) {
         const renovado = await renovarSessao();
         if (renovado) {
