@@ -25,6 +25,5 @@ public class UsuarioService
             Senha = usuarioRequest.Senha,
         };
         return await _usuarioRepositorio.Registrar(usuario);
-        
     }
 }

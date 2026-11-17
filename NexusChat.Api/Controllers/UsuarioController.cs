@@ -16,8 +16,14 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPost]
-    public async Task Registrar(UsuarioSignRequest usuarioSign)
+    public async Task<IActionResult> Registrar(UsuarioSignRequest usuarioRequest)
     {
-        return await _usuarioService.
+        var resultado = await _usuarioService.Registrar(usuarioRequest);
+        if (!resultado.Succeeded)
+        {
+            return BadRequest(resultado.Errors);
+        }
+        return Ok(resultado);
+        
     }
 }

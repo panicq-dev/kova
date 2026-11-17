@@ -24,7 +24,8 @@ public class UsuarioRepositorio : IUsuarioRepositorio
 
     public async Task<IdentityResult> Registrar(Usuario usuario)
     {
-        return await _userManager.CreateAsync(usuario, usuario.Senha);
+        var resultado = await _userManager.CreateAsync(usuario, usuario.Senha);
+        return resultado;
     }
     
     public async Task<Usuario?> ObterPorId(string id)
