@@ -66,15 +66,15 @@ public class AmizadeController : ControllerBase
         return Ok(resposta);
     }
 
-    [HttpPost("recusar-pedido")]
+    [HttpDelete("recusar-pedido/{amizadeId}")]
     [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> RecusarPedido([FromBody] RecusarPedidoAmizadeRequest request)
+    public async Task<IActionResult> RecusarPedido([FromRoute] string amizadeId, [FromQuery] string destinatarioId)
     {
-        var resposta = await _amizadeService.RecusarAmizade(request.AmizadeId, request.DestinatarioId);
+        var resposta = await _amizadeService.RecusarAmizade(amizadeId, destinatarioId);
 
         if (!resposta.Sucesso)
         {
