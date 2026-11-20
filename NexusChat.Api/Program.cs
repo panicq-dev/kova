@@ -56,7 +56,9 @@ builder.Services.AddAuthorization();
 
 // 4. Injeção de Dependência (Repositórios e Serviços)
 builder.Services.AddScoped<IUsuarioRepositorio, UsuarioRepositorio>();
+builder.Services.AddScoped<IAmizadeRepositorio, AmizadeRepositorio>();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<AmizadeService>();
 builder.Services.AddScoped<AutenticacaoService>();
 
 // 5. Controllers e Swagger
