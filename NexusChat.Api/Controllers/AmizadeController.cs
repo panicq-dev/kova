@@ -65,4 +65,29 @@ public class AmizadeController : ControllerBase
 
         return Ok(resposta);
     }
+
+    [HttpPost("recusar-pedido")]
+    [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(SolicitacaoAmizadeResponse), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RecusarPedido([FromBody] RecusarPedidoAmizadeRequest request)
+    {
+        var resposta = await _amizadeService.RecusarAmizade(request.AmizadeId, request.DestinatarioId);
+
+        if (!resposta.Sucesso)
+        {
+            return resposta.Codigo switch
+            {
+                "PEDIDO_NAO_ENCONTRADO" => NotFound(resposta),
+                "DADOS_INVALIDOS" or "STATUS_INVALIDO" => BadRequest(resposta),
+                "JA_ACEITO" => Conflict(resposta),
+                "ACESSO_NEGADO" or "USUARIO_BLOQUEADO" => StatusCode(StatusCodes.Status403Forbidden, resposta),
+                _ => BadRequest(resposta)
+            };
+        }
+
+        return Ok(resposta);
+    }
 }

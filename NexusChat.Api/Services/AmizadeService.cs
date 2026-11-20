@@ -173,4 +173,77 @@ public class AmizadeService
             Mensagem = "O pedido de amizade foi aceito com sucesso."
         };
     }
+
+    public async Task<SolicitacaoAmizadeResponse> RecusarAmizade(string amizadeId, string destinatarioId)
+    {
+        if (string.IsNullOrWhiteSpace(amizadeId) || string.IsNullOrWhiteSpace(destinatarioId))
+        {
+            return new SolicitacaoAmizadeResponse
+            {
+                Sucesso = false,
+                Codigo = "DADOS_INVALIDOS",
+                Mensagem = "Os identificadores de destinatarioId e amizadeId são obrigatórios."
+            };
+        }
+
+        var amizade = await _amizadeRepositorio.ObterAmizadePorId(amizadeId);
+        if (amizade is null)
+        {
+            return new SolicitacaoAmizadeResponse
+            {
+                Sucesso = false,
+                Codigo = "PEDIDO_NAO_ENCONTRADO",
+                Mensagem = "Solicitação de amizade não encontrada."
+            };
+        }
+
+        if (amizade.DestinatarioId != destinatarioId)
+        {
+            return new SolicitacaoAmizadeResponse
+            {
+                Sucesso = false,
+                Codigo = "ACESSO_NEGADO",
+                Mensagem = "Você não tem permissão para recusar esta solicitação."
+            };
+        }
+
+        if (amizade.Status == AmizadeStatus.Aceito)
+        {
+            return new SolicitacaoAmizadeResponse
+            {
+                Sucesso = false,
+                Codigo = "JA_ACEITO",
+                Mensagem = "Esta solicitação já foi aceita anteriormente e não pode ser recusada."
+            };
+        }
+
+        if (amizade.Status == AmizadeStatus.Bloqueado)
+        {
+            return new SolicitacaoAmizadeResponse
+            {
+                Sucesso = false,
+                Codigo = "USUARIO_BLOQUEADO",
+                Mensagem = "Não é possível recusar uma solicitação com relação bloqueada."
+            };
+        }
+
+        if (amizade.Status != AmizadeStatus.Pendente)
+        {
+            return new SolicitacaoAmizadeResponse
+            {
+                Sucesso = false,
+                Codigo = "STATUS_INVALIDO",
+                Mensagem = "Apenas solicitações com status pendente podem ser recusadas."
+            };
+        }
+
+        await _amizadeRepositorio.Remover(amizade);
+
+        return new SolicitacaoAmizadeResponse
+        {
+            Sucesso = true,
+            Codigo = "PEDIDO_RECUSADO",
+            Mensagem = "O pedido de amizade foi recusado com sucesso."
+        };
+    }
 }

@@ -8,4 +8,5 @@ public interface IAmizadeRepositorio
     Task<Amizade?> ObterAmizadeEntreUsuarios(string usuarioId1, string usuarioId2);
     Task CriarPedido(Amizade amizade);
     Task Atualizar(Amizade amizade);
+    Task Remover(Amizade amizade);
 }

@@ -38,4 +38,10 @@ public class AmizadeRepositorio : IAmizadeRepositorio
         _db.Amizades.Update(amizade);
         await _db.SaveChangesAsync();
     }
+
+    public async Task Remover(Amizade amizade)
+    {
+        _db.Amizades.Remove(amizade);
+        await _db.SaveChangesAsync();
+    }
 }
