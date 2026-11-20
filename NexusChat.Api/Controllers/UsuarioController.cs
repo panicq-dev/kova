@@ -16,7 +16,7 @@ public class UsuarioController : ControllerBase
         _usuarioService = usuarioService;
     }
 
-    [HttpPost]
+    [HttpPost("registrar")]
     public async Task<IActionResult> Registrar(UsuarioSignRequest usuarioRequest)
     {
         var resultado = await _usuarioService.Registrar(usuarioRequest);
@@ -47,5 +47,13 @@ public class UsuarioController : ControllerBase
             return Unauthorized("Sem autorização. RefreshToken expirado ou nulo.");
         };
         return Ok(resposta);
+    }
+
+    [HttpGet("buscar-usuario")]
+    public async Task<IActionResult> BuscarPorNome(string nomeDeUsuario)
+    {
+        var usuario = await _usuarioService.BuscarPorNome(nomeDeUsuario);
+        if (usuario is null) return NotFound("Usuário não encontrado.");
+        return Ok(usuario);
     }
 }

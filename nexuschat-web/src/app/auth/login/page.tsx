@@ -50,7 +50,7 @@ export default function LoginPage() {
                         <span className="text-[#8b6cf0]">#</span> geral
                     </p>
                     <p className="mt-0.5 text-xs text-[#9d97b5]">
-                        Onde a galera combina tudo
+                        Onde combinamos tudo!
                     </p>
                 </div>
 
@@ -123,10 +123,10 @@ export default function LoginPage() {
             <section className="p-8 sm:p-10">
                 <div className="mb-7">
                     <h1 className="font-[family-name:var(--font-titulo)] text-3xl font-bold tracking-tight">
-                       Tá esperando o que? A galera tá te esperando.
+                       Ah, estavamos te esperando! Que bom te ver de novo.
                     </h1>
                     <p className="mt-2 text-[15px] text-[#9d97b5]">
-                        Faça o login, e vem conversar.
+                        Seja bem vindo novamente! Primeiro, faça login.
                     </p>
                 </div>
 

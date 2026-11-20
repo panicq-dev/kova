@@ -81,6 +81,18 @@ public class UsuarioService
         await _usuarioRepositorio.Atualizar(usuario);
         
         return parTokens;
+    }
 
+    public async Task<UsuarioResponse?> BuscarPorNome(string nomeDeUsuario)
+    {
+        var usuario = await _usuarioRepositorio.ObterPorNomeDeUsuario(nomeDeUsuario);
+        if (usuario is null) return null;
+        
+        return new UsuarioResponse()
+        {
+            Id =  usuario.Id,
+            NomeDeUsuario = usuario.UserName,
+            Email = usuario.Email
+        };
     }
 }
