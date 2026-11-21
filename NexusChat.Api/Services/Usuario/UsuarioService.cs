@@ -6,7 +6,7 @@ using NexusChat.Repositorio;
 
 namespace NexusChat.Services;
 
-public class UsuarioService
+public class UsuarioService : IUsuarioService
 {
     private readonly AutenticacaoService _autenticacaoService;
     private readonly IUsuarioRepositorio _usuarioRepositorio;

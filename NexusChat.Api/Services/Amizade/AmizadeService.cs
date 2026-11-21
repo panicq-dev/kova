@@ -5,7 +5,7 @@ using NexusChat.Repositorio;
 
 namespace NexusChat.Services;
 
-public class AmizadeService
+public class AmizadeService : IAmizadeService
 {
     private readonly IUsuarioRepositorio _usuarioRepositorio;
     private readonly IAmizadeRepositorio _amizadeRepositorio;
